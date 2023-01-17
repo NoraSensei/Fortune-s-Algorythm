@@ -1,0 +1,119 @@
+
+<html> 
+	<head> 
+		<title>Voronoi diagram</title> 
+		<meta charset="utf-8" /> 
+		<style type="text/css">
+			body { margin: 0; padding: 0; height: 100%; font-size:20px;}
+		</style>
+		<link rel="stylesheet" href="style.css" />
+		
+		<script type="text/javascript" src="Point.js"></script> 
+		<script type="text/javascript" src="VEdge.js"></script> 
+		<script type="text/javascript" src="VEvent.js"></script> 
+		<script type="text/javascript" src="VParabola.js"></script> 
+		<script type="text/javascript" src="VQueue.js"></script>
+		<script type="text/javascript" src="VPolygon.js"></script>
+		<script type="text/javascript" src="Voronoi.js"></script> 
+		<script type="text/javascript" src="Tests_list.js"></script> 
+		<script type="text/javascript" src="Testing.js"></script> 
+		
+		<script type="application/javascript">
+			var voronoi = true;
+			var canv = null;
+			
+			function mouseX(e){	return e.clientX - e.target.offsetLeft;}
+			function mouseY(e){	return e.clientY - e.target.offsetTop; }
+			
+			function onLoad()
+			{
+				canv = document.getElementById("c");
+				canv.onmousemove = onMM;
+				canv.onclick = onClick;
+				c = canv.getContext("2d");
+				w = canv.width = window.innerWidth;
+				h = canv.height = window.innerHeight;
+				points = [];
+				v = new Voronoi();
+				
+				for(i=0; i<100; i++){
+					points.push(new Point(Math.random()*w, Math.random()*h));
+				}
+					
+				redraw();
+			}
+			
+			function onMM(e)
+			{
+				var last = points[points.length-1];
+				last.x = mouseX(e);
+				last.y = mouseY(e);
+				redraw();
+			}
+			
+			function onClick(e)
+			{
+				var last = points[points.length-1];
+				last.x += Math.random();
+				last.y += Math.random();
+				points.push( new Point(mouseX(e), mouseY(e)));
+			}
+			function resetPoints()
+			{
+				points = [points[points.length-1]];
+				redraw();
+			}
+			
+			function redraw()
+			{	
+				c.fillStyle = "#ffffff";
+				c.fillRect (0, 0, w, h);
+				
+				v.Compute(points, w, h);
+				edges = v.GetEdges();
+				cells = v.GetCells();
+				
+
+				c.lineWidth = 5;
+				c.strokeStyle = "#000";
+				for(i=0; i<edges.length; i++)
+				{
+					var e = edges[i];
+					c.beginPath();
+					c.moveTo(e.start.x, e.start.y);
+					c.lineTo(e.end.x, e.end.y);
+					c.closePath();
+					c.stroke();
+				}
+
+				
+				c.fillStyle = "rgb(0,255,0)";
+				for(i=0; i<points.length; i++)
+				{	
+					var p = points[i];
+					c.beginPath();
+					c.arc(p.x, p.y, 6, 0, Math.PI*2, true);
+					c.closePath();
+					c.fill();
+				}
+			}
+			
+		</script> 
+	</head> 
+	
+	<body onload="onLoad()" > 
+		<form style="position:absolute; z-index:1; margin:10px">
+			<input type="button" value="Сброс" onclick="resetPoints();" style="width:100px; height:30px;"/>
+			<!-- <input type="button" value="Ракушка" onclick="shell();" style="width:100px; height:30px;"/> -->
+			<div class="dropdown">
+				<button onclick="myFunction()" class="dropbtn">Список тестов</button>
+				<div id="myDropdown" class="dropdown-content">
+				  <a href="#" onclick="triangle()">Треугольник</a>
+				  <a href="#" onclick="rectangle()">Прямоугольник</a>
+				  <a href="#" onclick="shell()">Ракушка</a>
+				</div>
+			  </div>
+		</form>
+		<canvas id="c"> </canvas>
+	</body> 
+</html>
